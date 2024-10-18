@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semana 3</title>
+    <style>
+        input {
+            height: 30px;
+            width: 400px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <input id="usuario_nome" placeholder="Qual o seu nome"><br>
+    <input id="endereco_cep" onfocusout="buscarCEP()" placeholder="Digite seu CEP"><br>
+    <input id="endereco_rua" placeholder="Digite sua Rua"><br>
+    <input id="endereco_bairro" placeholder="Digite seu Bairro"><br>
+    <input id="endereco_cidade" placeholder="Digite sua Cidade"><br>
+    <input id="endereco_estado" placeholder="Digite seu Estado"><br>
+
+    <input type="file" onchange="showFile(this)">
+    <button onclick="salvar()">Salvar</button>
+
+    <script>
+        function buscarCEP(){
+            let cep = document.getElementById("endereco_cep").value;
+            let url = "https://brasilapi.com.br/api/cep/v1/"+cep;
+
+            fetch(url).then(function(dados){
+                dados.json().then(function(endereco){
+                    document.getElementById("endereco_rua").value = endereco.street;
+                    document.getElementById("endereco_bairro").value = endereco.neighborhood;
+                    document.getElementById("endereco_cidade").value = endereco.city;
+                    document.getElementById("endereco_estado").value = endereco.state;
+                })
+            })
+        }
+
+        function showFile(input) {
+            let file = input.files[0];
+
+            let fr = new FileReader();
+            fr.onload = function(dadosArquivo) {
+                let dados = JSON.parse(dadosArquivo.target.result);
+                document.getElementById("usuario_nome").value = dados.nome;
+                document.getElementById("endereco_cep").value = dados.cep;
+                document.getElementById("endereco_rua").value = dados.rua;
+                document.getElementById("endereco_bairro").value = dados.bairro;
+                document.getElementById("endereco_cidade").value = dados.cidade;
+                document.getElementById("endereco_estado").value = dados.estado;
+            }
+            fr.readAsText(file);
+        }
+        function salvar(){
+            let templink = document.createElement("a");
+            let dadosSalvar = {
+                "nome":document.getElementById("usuario_nome").value,
+                "cep":document.getElementById("endereco_cep").value, 
+                "rua":document.getElementById("endereco_rua").value,
+                "bairro":document.getElementById("endereco_bairro").value,
+                "cidade":document.getElementById("endereco_cidade").value,
+                "estado":document.getElementById("endereco_estado").value
+            }
+            let meuArquivo = new Blob([JSON.stringify(dadosSalvar)],{type:"text/plain"});
+            templink.setAttribute("href",URL.createObjectURL(meuArquivo));
+            templink.setAttribute("download","dados.json");
+            templink.click();
+        }
+    </script>
+</body>
+</html>
